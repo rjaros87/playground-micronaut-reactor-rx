@@ -1,7 +1,26 @@
 micronaut:
   application:
     name: playgroundMicronautReactorRx
-netty:
-  default:
-    allocator:
-      max-order: 3
+
+  executors:
+    my-scheduled:
+      type: scheduled
+      core-pool-size: 1
+    my-fixed:
+      type: fixed
+      n-threads: 2
+    my-cached:
+      type: cached
+    my-custom:
+      type: fixed
+      n-threads: 3
+
+  http:
+    client:
+      event-loop-group: http-client
+
+  netty:
+    event-loops:
+      http-client:
+        executor: my-cached
+        num-threads: 4

@@ -13,16 +13,26 @@ repositories {
 dependencies {
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("io.micronaut:micronaut-http-validation")
+
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("io.micronaut.reactor:micronaut-reactor")
+    implementation("io.micronaut.reactor:micronaut-reactor-http-client")
     implementation("io.micronaut.rxjava2:micronaut-rxjava2")
     implementation("io.micronaut.rxjava2:micronaut-rxjava2-http-client")
+
     implementation("jakarta.annotation:jakarta.annotation-api")
-    compileOnly("org.projectlombok:lombok")
-    runtimeOnly("ch.qos.logback:logback-classic")
-    runtimeOnly("io.micronaut.rxjava2:micronaut-rxjava2-http-server-netty")
     implementation("io.micronaut:micronaut-validation")
 
+    compileOnly("org.projectlombok:lombok")
+
+    runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly("io.micronaut.rxjava2:micronaut-rxjava2-http-server-netty")
+
+    testAnnotationProcessor("org.projectlombok:lombok")
+    
+    testImplementation("org.awaitility:awaitility:4.2.0")
+    testImplementation("org.projectlombok:lombok")
 }
 
 
