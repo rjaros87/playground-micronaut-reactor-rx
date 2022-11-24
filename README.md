@@ -16,6 +16,10 @@
 
 - [Micronaut RxJava 2 documentation](https://micronaut-projects.github.io/micronaut-rxjava2/snapshot/guide/index.html)
 
+## Feature reactor documentation
+
+- [Micronaut Reactor documentation](https://micronaut-projects.github.io/micronaut-reactor/snapshot/guide/index.html)
+
 
 ## Feature lombok documentation
 
