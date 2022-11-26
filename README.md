@@ -27,4 +27,13 @@
 
 - [https://projectlombok.org/features/all](https://projectlombok.org/features/all)
 
+## Documentation and interesting articles, code snippets, etc.:
+
+- [RxJava Observable](https://reactivex.io/documentation/observable.html)
+- [RxJava Operators](https://reactivex.io/documentation/operators.html)
+- [Reactor](https://projectreactor.io/docs/core/release/reference/index.html#which.create)
+- [Party tricks with RxJava, RxAndroid & Retrolambda](https://gist.github.com/cesarferreira/510aa2456dc0879f559f)
+- [When do you use map vs flatMap](https://stackoverflow.com/a/22941881)
+- [RxJava 2 Disposable — Under the hood](https://cupsofcode.com/post/when_how_use_rxjava_disposable_serialdisposable_compositedisposable)
+- [RxJava 2 how to dispose and when](https://stackoverflow.com/questions/49522619/the-result-of-subscribe-is-not-used)
 
