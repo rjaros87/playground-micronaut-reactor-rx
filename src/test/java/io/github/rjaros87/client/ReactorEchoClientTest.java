@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -81,5 +82,41 @@ class ReactorEchoClientTest {
         await().atMost(2, TimeUnit.SECONDS).untilAsserted(
                 () -> Assertions.assertTrue(disposable.isDisposed())
         );
+    }
+
+    @Test
+    void testEchoGetFlux() {
+        Disposable.Composite disposables = Disposables.composite();
+
+        var customExecutorThreads = Schedulers.fromExecutorService(customExecutorService);
+
+        var disposable = reactorEchoClient.getEcho()
+            .doOnNext(response -> {
+                log.info("Got response: {}", response);
+            })
+            .flatMap(res -> {
+                log.info("Flux flatMap - flatMap is asynchronous: {}", res);
+                return Flux.just("FluxRes: " + res);
+            })
+            .subscribeOn(Schedulers.parallel())
+            .publishOn(customExecutorThreads)
+            .subscribe(
+                result -> log.info("Result: {}", result),
+                throwable -> {
+                    log.error("Unexpected error due to:", throwable);
+                    disposables.dispose();
+                },
+                () -> {
+                    log.info("onComplete, going to dispose observer");
+                    disposables.dispose();
+                }
+            );
+
+        disposables.add(disposable);
+
+        await().atMost(2, TimeUnit.SECONDS).untilAsserted(
+                () -> Assertions.assertTrue(disposable.isDisposed())
+        );
+
     }
 }

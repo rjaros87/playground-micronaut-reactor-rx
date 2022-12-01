@@ -1,6 +1,7 @@
 package io.github.rjaros87.client;
 
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import jakarta.inject.Inject;
@@ -31,7 +32,7 @@ class RxEchoClientTest {
     ExecutorService customExecutorService;
 
     @Test
-    void testEchoPost() {
+    void testEchoPostMono() {
         CompositeDisposable compositeDisposable = new CompositeDisposable();
 
         var scheduledExecutorThreads = Schedulers.from(scheduledExecutorService);
@@ -55,24 +56,59 @@ class RxEchoClientTest {
             log.info("Mono flatMap - flatMap is asynchronous: {}", res);
 
             return rxEchoClient.postEcho(res)
-                    .map(result -> {
-                        log.info("Return raw http body");
-                        return result.getBody().orElse("Missing body");
-                    })
-                    .doOnSuccess(result -> log.info("doOnSuccess of http-client: {}", result))
-                    .subscribeOn(Schedulers.io()) //Seems to be executed on `http-client` event-loop (`my-cached` executor)
-                    .observeOn(customExecutorThreads);
+                .map(result -> {
+                    log.info("Return raw http body");
+                    return result.getBody().orElse("Missing body");
+                })
+                .doOnSuccess(result -> log.info("doOnSuccess of http-client: {}", result))
+                .subscribeOn(Schedulers.io()) //Seems to be executed on `http-client` event-loop (`my-cached` executor)
+                .observeOn(customExecutorThreads);
         })
         .subscribe(
-                result -> {
-                    log.info("Result of Mono combined with nested observer: {}", result);
-                    compositeDisposable.dispose();
-                },
+            result -> {
+                log.info("Result of Mono combined with nested observer: {}", result);
+                compositeDisposable.dispose();
+            },
+            throwable -> {
+                log.error("Unexpected error due to:", throwable);
+                compositeDisposable.dispose();
+            }
+        );
+
+        compositeDisposable.add(disposable);
+
+        await().atMost(2, TimeUnit.SECONDS).untilAsserted(
+                () -> Assertions.assertTrue(compositeDisposable.isDisposed())
+        );
+    }
+
+    @Test
+    void testEchoGetFlowable() {
+        CompositeDisposable compositeDisposable = new CompositeDisposable();
+
+        var customExecutorThreads = Schedulers.from(customExecutorService);
+
+        var disposable = rxEchoClient.getEcho()
+            .doOnNext(response -> {
+                log.info("Got response: {}", response);
+            })
+            .flatMap(res -> {
+                log.info("Flowable flatMap - flatMap is asynchronous: {}", res);
+                return Flowable.just("FlowableRes: " + res);
+            })
+            .doOnComplete(() -> {
+                log.info("onComplete, going to dispose observer");
+                compositeDisposable.dispose();
+            })
+            .subscribeOn(Schedulers.io())
+            .observeOn(customExecutorThreads)
+            .subscribe(
+                result -> log.info("Result: {}", result),
                 throwable -> {
                     log.error("Unexpected error due to:", throwable);
                     compositeDisposable.dispose();
                 }
-        );
+            );
 
         compositeDisposable.add(disposable);
 
